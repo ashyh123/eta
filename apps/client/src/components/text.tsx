@@ -1,5 +1,9 @@
 import type { JSX, TextStyle } from "nsh";
-import type { TextViewDocument, TextViewSelectionEvent } from "nsh/base";
+import type {
+  TextViewDocument,
+  TextViewRef,
+  TextViewSelectionEvent,
+} from "nsh/base";
 import type { IconName } from "./icons";
 import type { light, TextVariant } from "./theme";
 import { Image, Text, View } from "nsh";
@@ -82,6 +86,8 @@ export function Markdown(props: {
     after?: number;
   };
   onSelectionChange?: (event: TextViewSelectionEvent) => void;
+  /** The text view, to read its selection (`selectedText`). */
+  textRef?: (ref: TextViewRef) => void;
 }) {
   const c = colors();
   const fonts = Fonts();
@@ -108,6 +114,7 @@ export function Markdown(props: {
       document={props.document}
       options={{ html: false, streaming: props.streaming }}
       selectable
+      ref={props.textRef}
       onSelectionChange={props.onSelectionChange}
       links="open"
       styles={{

@@ -8,7 +8,7 @@ import type {
   ViewCore,
 } from "@eta/client-contracts";
 import type { JSX, ViewRef } from "nsh";
-import type { TextViewSelectionEvent } from "nsh/base";
+import type { TextViewRef, TextViewSelectionEvent } from "nsh/base";
 import {
   captainProposalOf,
   publishedRefs,
@@ -103,6 +103,21 @@ export function Message(props: {
   const item = () => props.item;
   let action: ViewRef | undefined;
   let reply: ViewRef | undefined;
+  let answerText: TextViewRef | undefined;
+  let selecting = 0;
+  /** The selection as Markdown where the view can rebuild it, so paragraphs
+   * stay apart and code keeps its fence; else as the plain text copied. */
+  async function select(event: TextViewSelectionEvent) {
+    const turn = ++selecting;
+    const markdown = event.text.trim()
+      ? await answerText?.selectedText({ format: "markdown" })
+      : "";
+    if (turn === selecting)
+      props.onSelectionChange?.(
+        { ...event, text: markdown?.trim() ? markdown : event.text },
+        reply,
+      );
+  }
   effect(() => {
     const message = item();
     if (message.kind === "task_draft" || message.kind === "task_card")
@@ -651,9 +666,10 @@ export function Message(props: {
                 >
                   <Markdown
                     value={text()}
-                    onSelectionChange={(event) =>
-                      props.onSelectionChange?.(event, reply)
-                    }
+                    textRef={(ref) => {
+                      answerText = ref;
+                    }}
+                    onSelectionChange={(event) => void select(event)}
                   />
                 </View>
               )}
