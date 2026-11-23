@@ -41,6 +41,7 @@ import { Settings } from "../pages/settings/settings";
 import { NewTask } from "../pages/tasks/new-task";
 import { TaskDetail } from "../pages/tasks/task-detail";
 import { TaskWorkspace } from "../pages/tasks/task-workspace";
+import { TemplateGallery } from "../pages/templates/gallery";
 import { follow, useHost } from "../services/host";
 
 export function Workspace(props: {
@@ -103,6 +104,8 @@ export function Workspace(props: {
   }
   const newGroup = signal(false);
   const newAgent = signal(false);
+  /** The template gallery, open on a template id ("" for none in particular). */
+  const templateGallery = signal<string | undefined>(undefined);
   const newTask = signal(false);
   const setup = signal(start.page === "onboard");
   let checkedSetup = false;
@@ -525,6 +528,25 @@ export function Workspace(props: {
           onRuntimes={() => {
             newAgent.set(false);
             showSettings("Runtimes");
+          }}
+          onTemplates={() => {
+            newAgent.set(false);
+            templateGallery.set("");
+          }}
+        />
+      </If>
+      <If when={templateGallery() !== undefined}>
+        <TemplateGallery
+          phone={phone()}
+          initialId={templateGallery() || undefined}
+          onClose={() => templateGallery.set(undefined)}
+          onCreated={(agentId) => {
+            templateGallery.set(undefined);
+            void direct(agentId);
+          }}
+          onModelServices={() => {
+            templateGallery.set(undefined);
+            showSettings("Model services");
           }}
         />
       </If>
