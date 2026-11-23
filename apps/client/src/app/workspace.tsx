@@ -42,6 +42,7 @@ import { NewTask } from "../pages/tasks/new-task";
 import { TaskDetail } from "../pages/tasks/task-detail";
 import { TaskWorkspace } from "../pages/tasks/task-workspace";
 import { TemplateGallery } from "../pages/templates/gallery";
+import { requestedTemplate } from "../pages/templates/link";
 import { follow, useHost } from "../services/host";
 
 export function Workspace(props: {
@@ -106,6 +107,14 @@ export function Workspace(props: {
   const newAgent = signal(false);
   /** The template gallery, open on a template id ("" for none in particular). */
   const templateGallery = signal<string | undefined>(undefined);
+  // A template link (`eta://template?id=…`, `?template=…`) opens the gallery on it.
+  effect(() => {
+    const id = requestedTemplate();
+    if (!id) return;
+    requestedTemplate.set(undefined);
+    newAgent.set(false);
+    templateGallery.set(id);
+  });
   const newTask = signal(false);
   const setup = signal(start.page === "onboard");
   let checkedSetup = false;
